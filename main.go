@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	ethGotypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/joho/godotenv"
@@ -40,7 +40,6 @@ func getRpcUrl() string {
 	}
 
 	rpcUrl := os.Getenv("RPC_URL")
-	fmt.Println("RPC_URL: v%", rpcUrl)
 	return rpcUrl
 }
 
@@ -73,39 +72,75 @@ func getLastBlock() *big.Int {
  * Get block data
  */
 
-func getBlockData() map[string]interface{} {
-	lastBlock := getLastBlock()
+// func getBlockData() map[string]interface{} {
+// 	lastBlock := getLastBlock()
+// 	client := getBlockchainClient()
+// 	block, err := client.BlockByNumber(context.Background(), lastBlock)
+// 	if err != nil {
+// 		log.Fatal(err, `for getBlockData`)
+// 	}
+
+// 	return map[string]interface{}{
+// 		"Number":       block.Number(),
+// 		"Hash":         block.Hash().Hex(),
+// 		"ParentHash":   block.ParentHash().Hex(),
+// 		"Nonce":        block.Nonce(),
+// 		"Sha3Uncles":   block.UncleHash().Hex(),
+// 		"Miner":        block.Coinbase().Hex(),
+// 		"Difficulty":   block.Difficulty(),
+// 		"ExtraData":    string(block.Extra()),
+// 		"Size":         block.Size(),
+// 		"GasLimit":     block.GasLimit(),
+// 		"GasUsed":      block.GasUsed(),
+// 		"Timestamp":    block.Time(),
+// 		"Transactions": getTransactions(block),
+// 	}
+// }
+
+func getTransactionData(tx string) map[string]interface{} {
 	client := getBlockchainClient()
-	block, err := client.BlockByNumber(context.Background(), lastBlock)
+	txHash := common.HexToHash(tx)
+	transaction, isPending, err := client.TransactionByHash(context.Background(), txHash)
 	if err != nil {
-		log.Fatal(err, `for getBlockData`)
+		log.Fatal(err, ` for finding the transaction`)
 	}
+
+	if !isPending {
+		log.Fatal(`tx pending`)
+	}
+
+	chainId, err := client.NetworkID(context.Background())
+	if err != nil {
+		log.Fatal(err, `for chainId`)
+	}
+
+	sender, err := ethGotypes.Sender(ethGotypes.NewLondonSigner(chainId), transaction)
+	if err != nil {
+		log.Fatal(err, `for gettig the sender`)
+	}
+
+	println(string(transaction.Data()), sender.Hex())
 
 	return map[string]interface{}{
-		"Number":       block.Number(),
-		"Hash":         block.Hash().Hex(),
-		"ParentHash":   block.ParentHash().Hex(),
-		"Nonce":        block.Nonce(),
-		"Sha3Uncles":   block.UncleHash().Hex(),
-		"Miner":        block.Coinbase().Hex(),
-		"Difficulty":   block.Difficulty(),
-		"ExtraData":    string(block.Extra()),
-		"Size":         block.Size(),
-		"GasLimit":     block.GasLimit(),
-		"GasUsed":      block.GasUsed(),
-		"Timestamp":    block.Time(),
-		"Transactions": getTransactions(block),
+		"Hash":     transaction.Hash().Hex(),
+		"Value":    transaction.Value().String(),
+		"Gas":      transaction.Gas(),
+		"GasPrice": transaction.GasPrice().String(),
+		"Nonce":    transaction.Nonce(),
+		"Data":     string(transaction.Data()),
+		"From":     sender.Hex(),
+		"To":       transaction.To().Hex(),
 	}
 }
 
-func getTransactions(block *ethGotypes.Block) []string {
-	var transactions []string
-	for _, tx := range block.Transactions() {
-		transactions = append(transactions, tx.Hash().Hex())
-	}
-	return transactions
-}
+// func getTransactions(block *ethGotypes.Block) []string {
+// 	var transactions []string
+// 	for _, tx := range block.Transactions() {
+// 		transactions = append(transactions, tx.Hash().Hex())
+// 	}
+// 	return transactions
+// }
 
 func main() {
-	fmt.Println(getBlockData())
+	println(getTransactionData("0xead0b1c9b70fab3656bbce96c0f052134790859e1bccdf4b5f27556baff1ab37"))
 }
