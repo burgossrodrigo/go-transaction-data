@@ -73,7 +73,7 @@ func getLastBlock() *big.Int {
  * Get block data
  */
 
-func getBlockData() *BlockData {
+func getBlockData() map[string]interface{} {
 	lastBlock := getLastBlock()
 	client := getBlockchainClient()
 	block, err := client.BlockByNumber(context.Background(), lastBlock)
@@ -81,20 +81,20 @@ func getBlockData() *BlockData {
 		log.Fatal(err, `for getBlockData`)
 	}
 
-	return &BlockData{
-		Number:       block.Number(),
-		Hash:         block.Hash().Hex(),
-		ParentHash:   block.ParentHash().Hex(),
-		Nonce:        block.Nonce(),
-		Sha3Uncles:   block.UncleHash().Hex(),
-		Miner:        block.Coinbase().Hex(),
-		Difficulty:   block.Difficulty(),
-		ExtraData:    string(block.Extra()),
-		Size:         block.Size(),
-		GasLimit:     block.GasLimit(),
-		GasUsed:      block.GasUsed(),
-		Timestamp:    block.Time(),
-		Transactions: getTransactions(block),
+	return map[string]interface{}{
+		"Number":       block.Number(),
+		"Hash":         block.Hash().Hex(),
+		"ParentHash":   block.ParentHash().Hex(),
+		"Nonce":        block.Nonce(),
+		"Sha3Uncles":   block.UncleHash().Hex(),
+		"Miner":        block.Coinbase().Hex(),
+		"Difficulty":   block.Difficulty(),
+		"ExtraData":    string(block.Extra()),
+		"Size":         block.Size(),
+		"GasLimit":     block.GasLimit(),
+		"GasUsed":      block.GasUsed(),
+		"Timestamp":    block.Time(),
+		"Transactions": getTransactions(block),
 	}
 }
 
