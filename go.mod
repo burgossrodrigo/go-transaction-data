@@ -2,7 +2,10 @@ module go-playground
 
 go 1.22.2
 
-require github.com/ethereum/go-ethereum v1.14.0
+require (
+	github.com/ethereum/go-ethereum v1.14.0
+	github.com/joho/godotenv v1.5.1
+)
 
 require (
 	github.com/DataDog/zstd v1.4.5 // indirect
@@ -35,7 +38,6 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.2.4 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
