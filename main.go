@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
-	"os"
-
 	"math/big"
+	"os"
 
 	"github.com/ethereum/go-ethereum/common"
 	ethGotypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/joho/godotenv"
 )
@@ -105,7 +106,7 @@ func getTransactionData(tx string) map[string]interface{} {
 		log.Fatal(err, ` for finding the transaction`)
 	}
 
-	if !isPending {
+	if isPending {
 		log.Fatal(`tx pending`)
 	}
 
@@ -119,7 +120,14 @@ func getTransactionData(tx string) map[string]interface{} {
 		log.Fatal(err, `for gettig the sender`)
 	}
 
-	println(string(transaction.Data()), sender.Hex())
+	// dataBytes, err := hex.DecodeString(string(transaction.Data()))
+	// if err != nil {
+	// 	log.Fatal(err, `for decoding the data`)
+	// }
+
+	hash := crypto.Keccak256Hash(transaction.Data())
+	fmt.Println(hash.Hex())
+	fmt.Println("Data (hex):", common.Bytes2Hex(transaction.Data()))
 
 	return map[string]interface{}{
 		"Hash":     transaction.Hash().Hex(),
@@ -142,5 +150,5 @@ func getTransactionData(tx string) map[string]interface{} {
 // }
 
 func main() {
-	println(getTransactionData("0xead0b1c9b70fab3656bbce96c0f052134790859e1bccdf4b5f27556baff1ab37"))
+	getTransactionData("0x1661b4bd2ce6110fa3f51c0fe76c6b5ad45e35873be9583ff0f93678eb17099b")
 }
